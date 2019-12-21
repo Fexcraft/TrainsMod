@@ -1,0 +1,16 @@
+{
+  "RegistryName": "minecraft:trainsmod",
+  "Name": "TrainsMod Experimental Addon",
+  "URL": "http://fexcraft.net/download?modid=trainsmod",
+  "UpdateID": "trainsmod",
+  "License": "http://fexcraft.net/license?id=mods",
+  "Dependencies": [],
+  "Authors": [
+    "01e4af9b-2a30-471e-addf-f6338ffce04b",
+    "c5ae64d0-64c0-43b5-8ece-eb2ba0970cd6"
+  ],
+  "Version": "1.0",
+  "GenerateLang": false,
+  "GenerateItemJson": false,
+  "GenerateItemIcon": false
+}
