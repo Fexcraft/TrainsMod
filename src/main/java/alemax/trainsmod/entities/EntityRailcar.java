@@ -1,14 +1,11 @@
 package alemax.trainsmod.entities;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
 import alemax.trainsmod.TrainsMod;
 import alemax.trainsmod.blocks.BlockAMRail;
-import alemax.trainsmod.blocks.tileentities.TileEntityAMRail;
 import alemax.trainsmod.blocks.tileentities.TileEntityAMRailCurved;
 import alemax.trainsmod.init.ModBlocks;
 import alemax.trainsmod.init.ModItems;
@@ -16,21 +13,15 @@ import alemax.trainsmod.networking.PacketHandler;
 import alemax.trainsmod.networking.TrainPassengerSyncMessage;
 import alemax.trainsmod.networking.TrainSyncMessage;
 import alemax.trainsmod.networking.TrainSyncSpeedMessage;
-import alemax.trainsmod.proxy.ClientProxy;
 import alemax.trainsmod.util.AMMaths;
 import alemax.trainsmod.util.ModKeys;
 import alemax.trainsmod.util.Seat;
-import alemax.trainsmod.util.TrackPoint;
 import alemax.trainsmod.util.Train;
 import alemax.trainsmod.util.TrainUID;
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -39,13 +30,10 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import trackapi.lib.ITrack;
-import trackapi.lib.ITrackBlock;
 
 public abstract class EntityRailcar extends Entity {
 	
@@ -437,79 +425,7 @@ public abstract class EntityRailcar extends Entity {
         }
     }
 	
-	protected void calculateMotion() {
-		double x = this.posX;
-		double y = this.posY;
-		double z = this.posZ;
-		double length = 0;
-		this.railBlock = new BlockPos(posX, posY, posZ);
-		
-		
-		double tickDistance = (speed + bonusSpeed) / 20;
-		do {
-			Block trackBlock = this.world.getBlockState(railBlock).getBlock();
-			if(trackBlock instanceof ITrackBlock) {
-				Vec3d nPos = ((ITrackBlock) trackBlock).getNextPosition(this.world, this.railBlock, new Vec3d(x, y, z), new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * (tickDistance - length), 0, Math.cos(Math.toRadians(this.rotationYaw)) * (tickDistance - length)));
-				length += Math.sqrt(Math.pow(nPos.x - x, 2) + Math.pow(nPos.z - z, 2));
-				x = nPos.x;
-				y = nPos.y;
-				z = nPos.z;
-				this.railBlock = new BlockPos(x, y, z);
-			} else {
-				TileEntity te = this.world.getTileEntity(this.railBlock);
-				if(te instanceof ITrack) {
-					Vec3d nPos = ((ITrack) te).getNextPosition(new Vec3d(x, y, z), new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * (tickDistance - length), 0, Math.cos(Math.toRadians(this.rotationYaw)) * (tickDistance - length)));
-					length += Math.sqrt(Math.pow(nPos.x - x, 2) + Math.pow(nPos.z - z, 2));
-					//double add = Math.sqrt(Math.pow(nPos.x - x, 2) + Math.pow(nPos.z - z, 2));
-					x = nPos.x;
-					y = nPos.y;
-					z = nPos.z;
-					this.railBlock = new BlockPos(x, y, z);
-				} else {
-					boolean br = false;
-					int xStart;
-					int zStart;
-					int xEnd;
-					int zEnd;
-					
-					Vec3d forward = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)), 0, Math.cos(Math.toRadians(this.rotationYaw)));
-					Vec3d across = forward.crossProduct(new Vec3d(0, 1, 0));
-					
-					ArrayList<BlockPos> possiblePositions = new ArrayList<>(); 
-					for(double i = 1; i < 6; i += 0.5) {
-						for(double j = 0 - i; j < i + 1; j += 0.5) {
-							Vec3d vectorPos = new Vec3d(x, y, z).add(forward.scale(i)).add(across.scale(j));
-							BlockPos cPos = new BlockPos(vectorPos.x, vectorPos.y, vectorPos.z);
-							TileEntity nte = this.world.getTileEntity(cPos);
-							if(nte instanceof ITrack || this.world.getBlockState(new BlockPos(this.railBlock.getX() + i, this.railBlock.getY(), this.railBlock.getZ() + j)).getBlock() instanceof ITrackBlock) {
-								possiblePositions.add(nte.getPos());
-								br = true;
-							}
-						}
-					}
-					if(br) {
-						BlockPos nearest = possiblePositions.get(0);
-						double nearestLength = Math.sqrt(Math.pow(nearest.getX() - railBlock.getX(), 2) + Math.pow(nearest.getZ() - railBlock.getZ(), 2));
-						for(int i = 1; i < possiblePositions.size(); i++) {
-							BlockPos currentBP = possiblePositions.get(i);
-							double distance = Math.sqrt(Math.pow(currentBP.getX() - railBlock.getX(), 2) + Math.pow(currentBP.getZ() - railBlock.getZ(), 2));
-							if(distance < nearestLength) {
-								nearestLength = distance;
-								nearest = currentBP;
-							}
-						}
-						this.railBlock = nearest;
-					}
-					
-					
-					if(!br) break;
-				}
-			}
-			
-		} while(length < (tickDistance * 0.9999) && speed > 0.0000001);
-		this.frontTrainMotionX = x - posX;
-		this.frontTrainMotionZ = z - posZ;
-	}
+	protected void calculateMotion() {}
 	
 	protected void calculateRearPos() {
 		double x = this.posX;
@@ -517,68 +433,7 @@ public abstract class EntityRailcar extends Entity {
 		double z = this.posZ;
 		double length = 0;
 		BlockPos rearRailBlock = new BlockPos(posX, posY, posZ);
-		
-		do {
-			Block trackBlock = this.world.getBlockState(rearRailBlock).getBlock();
-			if(trackBlock instanceof ITrackBlock) {
-				Vec3d nPos = ((ITrackBlock) trackBlock).getNextPosition(this.world, rearRailBlock, new Vec3d(x, y, z), new Vec3d(Math.sin(Math.toRadians(this.rotationYaw)) * (this.axleDistance - length), 0, -Math.cos(Math.toRadians(this.rotationYaw)) * (this.axleDistance - length)));
-				length += Math.sqrt(Math.pow(nPos.x - x, 2) + Math.pow(nPos.z - z, 2));
-				x = nPos.x;
-				y = nPos.y;
-				z = nPos.z;
-				rearRailBlock = new BlockPos(x, y, z);
-			} else {
-				TileEntity te = this.world.getTileEntity(rearRailBlock);
-				if(te instanceof ITrack) {
-					Vec3d nPos = ((ITrack) te).getNextPosition(new Vec3d(x, y, z), new Vec3d(Math.sin(Math.toRadians(this.rotationYaw)) * (this.axleDistance - length), 0, -Math.cos(Math.toRadians(this.rotationYaw)) * (this.axleDistance - length)));
-					length += Math.sqrt(Math.pow(nPos.x - x, 2) + Math.pow(nPos.z - z, 2));
-					double add = Math.sqrt(Math.pow(nPos.x - x, 2) + Math.pow(nPos.z - z, 2));
-					x = nPos.x;
-					y = nPos.y;
-					z = nPos.z;
-					rearRailBlock = new BlockPos(x, y, z);
-				} else {
-					boolean br = false;
-					int xStart;
-					int zStart;
-					int xEnd;
-					int zEnd;
-					
-					Vec3d forward = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)), 0, Math.cos(Math.toRadians(this.rotationYaw)));
-					forward = new Vec3d(-forward.x, 0, -forward.z);
-					Vec3d across = forward.crossProduct(new Vec3d(0, 1, 0));
-					
-					ArrayList<BlockPos> possiblePositions = new ArrayList<>(); 
-					for(int i = 1; i < 6; i++) {
-						for(int j = 0 - i; j < 2 * i + 1; j++) {
-							Vec3d vectorPos = new Vec3d(x, y, z).add(forward.scale(i)).add(across.scale(j));
-							BlockPos cPos = new BlockPos(vectorPos.x, vectorPos.y, vectorPos.z);
-							TileEntity nte = this.world.getTileEntity(cPos);
-							if(nte instanceof ITrack && !(nte instanceof TileEntityAMRail)) {
-								possiblePositions.add(nte.getPos());
-								br = true;
-							}
-						}
-					}
-					if(br) {
-						BlockPos nearest = possiblePositions.get(0);
-						double nearestLength = Math.sqrt(Math.pow(nearest.getX() - rearRailBlock.getX(), 2) + Math.pow(nearest.getZ() - rearRailBlock.getZ(), 2));
-						for(int i = 1; i < possiblePositions.size(); i++) {
-							BlockPos currentBP = possiblePositions.get(i);
-							double distance = Math.sqrt(Math.pow(currentBP.getX() - rearRailBlock.getX(), 2) + Math.pow(currentBP.getZ() - rearRailBlock.getZ(), 2));
-							if(distance < nearestLength) {
-								nearestLength = distance;
-								nearest = currentBP;
-							}
-						}
-						rearRailBlock = nearest;
-					}
-					
-					
-					if(!br) break;
-				}
-			}
-		} while(length < this.axleDistance * 0.9999);
+		//
 		this.rearPosX = x;
 		this.rearPosZ = z;
 	}

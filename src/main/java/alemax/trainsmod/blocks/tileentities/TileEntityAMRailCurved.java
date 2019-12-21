@@ -8,10 +8,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import scala.util.Random;
-import trackapi.lib.ITrack;
 
-@net.minecraftforge.fml.common.Optional.Interface(iface = "trackapi.lib.ITrack", modid = "trackapi")
-public class TileEntityAMRailCurved extends TileEntity implements ITrack {
+public class TileEntityAMRailCurved extends TileEntity {
 		
 	private long id;
 	private byte comingFrom = 3;
@@ -174,7 +172,7 @@ public class TileEntityAMRailCurved extends TileEntity implements ITrack {
 	*/
 	
 	
-	@Override
+	//@Override
 	public Vec3d getNextPosition(Vec3d position, Vec3d motion) {
 		//motion = new Vec3d(-motion.x, motion.y, -motion.z);
 		//if(!this.world.isRemote) System.out.println(motion.x + "\t" + motion.z);
@@ -710,7 +708,7 @@ public class TileEntityAMRailCurved extends TileEntity implements ITrack {
 		return point;
 	}
 
-	@Override
+	//@Override
 	public double getTrackGauge() {
 		return 1.5;
 	}

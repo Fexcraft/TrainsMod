@@ -2,14 +2,12 @@ package alemax.trainsmod.blocks.tileentities;
 
 import alemax.trainsmod.util.TrackPoint;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import trackapi.lib.ITrack;
 
 public class TileEntityAMRail extends TileEntity {
 	

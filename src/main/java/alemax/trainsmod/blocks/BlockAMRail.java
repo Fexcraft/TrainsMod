@@ -1,17 +1,13 @@
 package alemax.trainsmod.blocks;
 
 import alemax.trainsmod.blocks.tileentities.TileEntityAMRail;
-import alemax.trainsmod.blocks.tileentities.TileEntityTrackMarker;
-import alemax.trainsmod.init.ModBlocks;
 import alemax.trainsmod.init.ModItems;
 import alemax.trainsmod.proxy.CommonProxy;
-import alemax.trainsmod.util.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -23,13 +19,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import trackapi.lib.ITrackBlock;
 
-@net.minecraftforge.fml.common.Optional.Interface(iface = "trackapi.lib.ITrackBlock", modid = "trackapi")
-public class BlockAMRail extends Block implements ITrackBlock {
+public class BlockAMRail extends Block {
 	
 	public static final AxisAlignedBB AM_RAIL_AABB_NS = new AxisAlignedBB(-0.625, 0, 0, 1.625, 0.1875, 1);
 	public static final AxisAlignedBB AM_RAIL_AABB_EW = new AxisAlignedBB(0, 0, -0.625, 1, 0.1875, 1.625);
@@ -61,7 +54,7 @@ public class BlockAMRail extends Block implements ITrackBlock {
 		//te.set(state.getValue(FACING));
 	}
 	
-	@Override
+	//@Override
 	public Vec3d getNextPosition(World world, BlockPos pos, Vec3d currentPosition, Vec3d motion) {
 		float speed = (float) Math.sqrt(Math.pow(motion.x, 2) + Math.pow(motion.y, 2) + Math.pow(motion.z, 2));
 		//if(world.getBlockState(pos).getValue(FACING).equals(EnumFacing.EAST)) System.out.println("east");
@@ -92,7 +85,7 @@ public class BlockAMRail extends Block implements ITrackBlock {
 		}
 	}
 
-	@Override
+	//@Override
 	public double getTrackGauge(World arg0, BlockPos arg1) {
 		return 1.5;
 	}
